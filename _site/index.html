@@ -93,10 +93,10 @@
       color: #666;
     }
 
-    .jitter {
+    .jitter:hover {
       position: relative;
       display: inline-block;
-      animation: jitter 0.1s infinite alternate;
+      animation: jitter 0.05s infinite alternate;
     }
 
     @keyframes jitter {
@@ -107,6 +107,18 @@
       100% {
         transform: translate(var(--random-x), var(--random-y));
       }
+    }
+
+    /* Style for the total hover duration display */
+    .total-hover-duration {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
 
 
@@ -128,7 +140,7 @@
 <body>
   <div class="page-container">
 
-    <div class="container jitter">
+    <div class="container jitter" id="logo-cat">
       <img src="/images/cat_logo.png" alt="Cat Logo">
     </div>
 
@@ -150,14 +162,20 @@
       </div>
     </div>
   </div>
+  <!-- Container for displaying total hover duration -->
+  <div class="total-hover-duration">
+    <h1>Total Hover Duration:</h1>
+    <h1 id="hoverTime">0 ms</h1>
+    <h1 id="idleTime">Idle Time: 0 seconds</h1>
+  </div>
   <script>
     // Get all elements with class 'jitter' and apply random translation values
     var jitterElements = document.querySelectorAll('.jitter');
 
     jitterElements.forEach(function (element) {
       // Generate random values between -10px to 10px for X and Y translations
-      var randomX = getRandomInt(-10, 10);
-      var randomY = getRandomInt(-10, 10);
+      var randomX = getRandomInt(-5, 5);
+      var randomY = getRandomInt(-5, 5);
 
       // Set CSS variables for random translations
       element.style.setProperty('--random-x', randomX + 'px');
@@ -170,6 +188,98 @@
       max = Math.floor(max);
       return Math.floor(Math.random() * (max - min)) + min;
     }
+
+    // Function to set random jitter values on hover
+    function setRandomJitter() {
+      var jitterElements = document.querySelectorAll('.jitter');
+
+      jitterElements.forEach(function (element) {
+        var randomX = getRandomInt(-10, 10);
+        var randomY = getRandomInt(-10, 10);
+
+        element.style.setProperty('--random-x', randomX + 'px');
+        element.style.setProperty('--random-y', randomY + 'px');
+      });
+    }
+
+
+    // Function to set jitter values to increase on hover
+    function setHoverJitter() {
+      var jitterElements = document.querySelectorAll('.jitter');
+
+      jitterElements.forEach(function (element) {
+        var randomX = getRandomInt(-10, 10);
+        var randomY = getRandomInt(-10, 10);
+
+        element.style.setProperty('--random-x', randomX + 'px');
+        element.style.setProperty('--random-y', randomY + 'px');
+      });
+    }
+
+    // Variables to track hover time
+    let totalHoverTime = 0; // Variable to keep track of total hover time in seconds
+    let idleTime = 0; // Variable to keep track of idle time in seconds
+    let startTime; // Variable to store start time of current hover
+    let updateHoverInterval; // Interval ID for updating h1 during hover
+    let updateIdleInterval; // Interval ID for updating h1 during idle
+
+    const logoCat = document.querySelector('#logo-cat');
+    const hoverDuration = document.querySelector('#hoverTime');
+    const idleDuration = document.querySelector('#idleTime');
+
+    logoCat.addEventListener('mouseover', function () {
+      startTime = new Date().getTime(); // Record start time of hover
+      updateHoverInterval = setInterval(updateHoverDurationRealtime, 100); // Update h1 every 100ms while hovering
+      clearInterval(updateIdleInterval); // Stop updating idle time when hovering
+    });
+
+    logoCat.addEventListener('mouseleave', function () {
+      if (startTime) {
+        const hoverTime = (new Date().getTime() - startTime) / 1000; // Calculate hover time in seconds
+        totalHoverTime += hoverTime; // Add to total hover time
+        clearInterval(updateHoverInterval); // Stop updating h1 during hover
+        updateHoverTime(); // Update hoverTime id with new total hover time
+        startTime = null; // Reset start time
+      }
+      // Start updating idle time when leaving black box
+      updateIdleInterval = setInterval(updateIdleTime, 100); // Update h1 every 100ms during idle
+    });
+
+    document.addEventListener('mouseover', function (event) {
+      if (event.target !== logoCat && !logoCat.contains(event.target)) {
+
+        if (startTime) {
+          const currentTime = new Date().getTime();
+          const hoverTime = (currentTime - startTime) / 1000; // Calculate hover time in seconds
+          idleTime += hoverTime; // Add to idle time
+          clearInterval(updateHoverInterval); // Stop updating h1 during hover
+          updateHoverTime(); // Update hoverTime id with new total hover time
+          startTime = null; // Reset start time
+        }
+      }
+    });
+
+    function updateHoverTime() {
+      hoverDuration.textContent = `Total Hover Time: ${totalHoverTime.toFixed(1)} seconds`;
+      idleDuration.textContent = `Idle Time: ${idleTime.toFixed(1)} seconds`;
+    }
+
+    function updateHoverDurationRealtime() {
+      totalHoverTime += 0.1;
+      hoverDuration.textContent = `Total Hover Time: ${totalHoverTime.toFixed(1)} seconds`;
+    }
+
+
+    function updateIdleTime() {
+      idleTime += 0.1; // Update idle time by 0.1 seconds (adjust interval to your preference)
+      if (totalHoverTime >= 0) {
+        totalHoverTime -= 0.1;
+      }
+      hoverDuration.textContent = `Total Hover Time: ${totalHoverTime.toFixed(1)} seconds`;
+      idleDuration.textContent = `Idle Time: ${idleTime.toFixed(1)} seconds`;
+    }
+
+
   </script>
 </body>
 
