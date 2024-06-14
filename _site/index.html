@@ -93,6 +93,22 @@
       color: #666;
     }
 
+    .jitter {
+      position: relative;
+      display: inline-block;
+      animation: jitter 0.1s infinite alternate;
+    }
+
+    @keyframes jitter {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      100% {
+        transform: translate(var(--random-x), var(--random-y));
+      }
+    }
+
 
     /* Media query for mobile devices */
     @media (max-width: 768px) {
@@ -112,7 +128,7 @@
 <body>
   <div class="page-container">
 
-    <div class="container">
+    <div class="container jitter">
       <img src="/images/cat_logo.png" alt="Cat Logo">
     </div>
 
@@ -134,7 +150,27 @@
       </div>
     </div>
   </div>
+  <script>
+    // Get all elements with class 'jitter' and apply random translation values
+    var jitterElements = document.querySelectorAll('.jitter');
 
+    jitterElements.forEach(function (element) {
+      // Generate random values between -10px to 10px for X and Y translations
+      var randomX = getRandomInt(-10, 10);
+      var randomY = getRandomInt(-10, 10);
+
+      // Set CSS variables for random translations
+      element.style.setProperty('--random-x', randomX + 'px');
+      element.style.setProperty('--random-y', randomY + 'px');
+    });
+
+    // Function to get a random integer between min (inclusive) and max (exclusive)
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+  </script>
 </body>
 
 </html>
